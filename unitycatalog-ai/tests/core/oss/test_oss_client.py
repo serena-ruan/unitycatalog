@@ -6,13 +6,13 @@ from dataclasses import dataclass
 from typing import Any, Dict, List
 
 import pytest
+
+from ucai.core.oss import UnitycatalogFunctionClient
+from ucai.test_utils.function_utils import CATALOG, random_func_name
 from unitycatalog import Unitycatalog
 from unitycatalog.types.function_create_params import (
     FunctionInfoInputParamsParameter,
 )
-
-from ucai.core.oss import UnitycatalogFunctionClient
-from ucai.test_utils.function_utils import CATALOG, random_func_name
 
 SCHEMA = "uc_test"
 _logger = logging.getLogger(__name__)
