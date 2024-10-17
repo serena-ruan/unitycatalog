@@ -117,4 +117,4 @@ agent_executor.invoke({"input": "36939 * 8922.4"})
 
 #### Configurations for UC functions execution
 
-We provide configurations for databricks client to control the function execution behaviors, check [../../README.md#function-execution-arguments-configuration]
+We provide configurations for databricks client to control the function execution behaviors, check [function execution arguments section](../../README.md#function-execution-arguments-configuration).
