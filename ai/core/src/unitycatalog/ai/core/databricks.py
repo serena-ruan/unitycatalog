@@ -1,6 +1,7 @@
 import base64
 import json
 import logging
+import os
 from dataclasses import dataclass
 from decimal import Decimal
 from io import StringIO
@@ -105,6 +106,23 @@ def _is_in_databricks_notebook_environment() -> bool:
         return False
 
 
+def get_databricks_runtime_version():
+    if ver := os.environ.get("DATABRICKS_RUNTIME_VERSION"):
+        return ver
+    _DATABRICKS_VERSION_FILE_PATH = "/databricks/DBR_VERSION"
+    if os.path.exists(_DATABRICKS_VERSION_FILE_PATH):
+        # In Databricks DCS cluster, it doesn't have DATABRICKS_RUNTIME_VERSION
+        # environment variable, we have to read version from the version file.
+        with open(_DATABRICKS_VERSION_FILE_PATH) as f:
+            return f.read().strip()
+    return None
+
+
+def _is_in_databricks_serverless_runtime():
+    dbr_version = get_databricks_runtime_version()
+    return dbr_version and dbr_version.startswith("client.")
+
+
 def _warn_if_workspace_provided(**kwargs):
     if "warehouse_id" in kwargs:
         _logger.warning(WAREHOUSE_DEFINED_NOT_SUPPORTED_MESSAGE)
@@ -168,6 +186,11 @@ class DatabricksFunctionClient(BaseFunctionClient):
         _validate_databricks_connect_available()
 
         from databricks.connect.session import DatabricksSession as SparkSession
+
+        # If in Databricks serverless runtime, use the default Spark session.
+        if _is_in_databricks_serverless_runtime():
+            self.spark = SparkSession.builder.getOrCreate()
+            return
 
         if self.profile:
             builder = SparkSession.builder.profile(self.profile).serverless(True)
